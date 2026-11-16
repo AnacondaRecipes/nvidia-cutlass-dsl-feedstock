@@ -1,0 +1,11 @@
+anaconda_config_version: 1
+upstream_sources:
+  # The package source is 'developer.download.nvidia.com'. Therefore, track CF releases.
+  - webpage:
+      url: https://api.anaconda.org/package/conda-forge/nvidia-cutlass-dsl
+      regex: '"version":\s*"([^"]+)"'
+    packages:
+      - libcute-dsl-runtime
+      - libcute-dsl-runtime-dev
+      - libcute-dsl-runtime-static
+      - nvidia-cutlass-dsl

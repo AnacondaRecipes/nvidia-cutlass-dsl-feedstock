@@ -1,14 +1,15 @@
-# Free-threaded CPython (3.14t) is not supported yet: numpy, protobuf and
-# apache-tvm-ffi publish no 3.14t packages. It will be enabled once all three do
-
 {% set name = "nvidia_cutlass_dsl" %}
 {% set version = "4.7.1" %}
-{% set arm_variant_type = arm_variant_type | default("sbsa") %}
-{% set cuda_compiler_version = cuda_compiler_version | default("None") %}
-{% set cuda_major = cuda_compiler_version.split(".")[0] %}
+
+# Anaconda: The selectors on 'cuda_major' and 'cuda_major_other' are needed
+# for PBP to render recipes correctly during graph generation.
+# Why?: 'cuda_compiler_version' is not defined for osx in aggregate's cbc.yaml (as of Oct 18th, 2026).
+# Therefore, PBP renderer for osx fails as it sees 'cuda_compiler_version' variable as 'NoneType'.
+{% set cuda_major = cuda_compiler_version.split(".")[0] %}  # [not osx]
 # The wheel layout carries a cu12 and a cu13 directory side by side; only the
 # one matching this build gets any files.
-{% set cuda_major_other = "13" if cuda_major == "12" else "12" %}
+{% set cuda_major_other = "13" if cuda_major == "12" else "12" %}  # [not osx]
+
 {% set platform = "linux-x86_64" %}  # [linux64]
 {% set platform = "linux-sbsa" %}  # [aarch64]
 {% set extension = "tar.xz" %}  # [not win]
@@ -40,8 +41,8 @@ source:
     sha256: "d5d0c10ee8c3b6e0ba737f7478c948fc5a2476441c34b12da07f42590384b748"  # [linux and aarch64 and (cuda_compiler_version or "").startswith("13") and arm_variant_type == "sbsa"]
 
 build:
-  number: 1
-  skip: true  # [not (linux64 or aarch64) or cuda_compiler_version in ("None", "")]
+  number: 0
+  skip: true  # [osx or (not (linux64 or aarch64)) or cuda_compiler_version in ("None", "")]
 
 requirements:
   build:
@@ -77,6 +78,7 @@ outputs:
       license: LicenseRef-NVIDIA-End-User-License-Agreement
       license_file: LICENSE
       license_url: https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/license.html
+      license_family: Other
       summary: Runtime shared library for the CUTLASS DSL.
       description: |
         The shared library that GPU kernels JIT-compiled by the CUTLASS DSL load
@@ -85,6 +87,7 @@ outputs:
         libcute-dsl-runtime-dev to build C/C++ against it, or nvidia-cutlass-dsl
         to use it from Python.
       doc_url: https://docs.nvidia.com/cutlass/latest/
+      dev_url: https://github.com/NVIDIA/cutlass
 
   # Header/cross-link stubs to build C/C++ against the runtime lib. Also one per CTK.
   - name: libcute-dsl-runtime-dev
@@ -118,11 +121,13 @@ outputs:
       license: LicenseRef-NVIDIA-End-User-License-Agreement
       license_file: LICENSE
       license_url: https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/license.html
+      license_family: Other
       summary: Development files for building against the CUTLASS DSL runtime.
       description: |
         The C header and cross-compile link stubs needed to build C/C++ code
         against libcute-dsl-runtime.
       doc_url: https://docs.nvidia.com/cutlass/latest/
+      dev_url: https://github.com/NVIDIA/cutlass
 
   # The CUDA dialect shim as a static archive; one per CTK
   - name: libcute-dsl-runtime-static
@@ -152,11 +157,13 @@ outputs:
       license: LicenseRef-NVIDIA-End-User-License-Agreement
       license_file: LICENSE
       license_url: https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/license.html
+      license_family: Other
       summary: Static library for the CUTLASS DSL CUDA dialect shim.
       description: |
         The CUDA dialect shim that DSL-generated code calls into, as a static
         archive to link into your own binary
       doc_url: https://docs.nvidia.com/cutlass/latest/
+      dev_url: https://github.com/NVIDIA/cutlass
 
   # Python code + the CPython-ABI-specific extension module; one per python and CTK.
   - name: nvidia-cutlass-dsl
@@ -235,6 +242,7 @@ outputs:
       license: LicenseRef-NVIDIA-End-User-License-Agreement
       license_file: LICENSE
       license_url: https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/license.html
+      license_family: Other
       summary: A Python native interface for writing high-performance CUDA kernels based on core CUTLASS and CuTe concepts without any performance compromises.
       description: |
         A Python native interface for writing high-performance CUDA kernels based on
@@ -247,12 +255,14 @@ outputs:
         C/C++ against the runtime. Install those two on their own for the
         C/C++ use case without Python.
       doc_url: https://docs.nvidia.com/cutlass/latest/
+      dev_url: https://github.com/NVIDIA/cutlass
 
 about:
   home: https://docs.nvidia.com/cutlass/latest/
   license: LicenseRef-NVIDIA-End-User-License-Agreement
   license_file: LICENSE
   license_url: https://docs.nvidia.com/cutlass/latest/media/docs/pythonDSL/license.html
+  license_family: Other
   summary: A Python native interface for writing high-performance CUDA kernels based on core CUTLASS and CuTe concepts without any performance compromises.
   description: |
     A Python native interface for writing high-performance CUDA kernels based on
@@ -265,8 +275,11 @@ about:
     library, and the development and static-library packages for building C/C++
     against that runtime.
   doc_url: https://docs.nvidia.com/cutlass/latest/
+  dev_url: https://github.com/NVIDIA/cutlass
 
 extra:
+  skip-lints:
+    - deprecate_license_url
   feedstock-name: nvidia-cutlass-dsl
   recipe-maintainers:
     - conda-forge/cuda
