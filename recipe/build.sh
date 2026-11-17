@@ -1,5 +1,5 @@
 #!/bin/bash
-set -ex
+set -exuo pipefail
 
 # The redistributable archive uses lib64 on some arches; normalize to lib.
 [[ -d lib64 ]] && mv lib64 lib
