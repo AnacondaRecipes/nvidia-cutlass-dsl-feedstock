@@ -216,7 +216,11 @@ outputs:
         - protobuf >={{ protobuf_min }}
         # Provides the `tvm_ffi` module used by the TVM-FFI interop paths.
         # load_module() → ctypes.CDLL → dlopen
-        - apache-tvm-ffi
+        # Anaconda: >=0.1.11 is the minimum for kwargs, defaults and top-level dataclass
+        # arguments (tvm_ffi.utils.kwargs_wrapper). Upstream sets no pin; the floor comes from
+        # the DSL's own ImportError guard in (search for "apache-tvm-ffi"):
+        # https://github.com/NVIDIA/cutlass/blob/v{{ version }}/python/CuTeDSL/cutlass/cutlass_dsl/tvm_ffi_provider.py
+        - apache-tvm-ffi >=0.1.11
         - {{ pin_compatible("cuda-version", min_pin="x", max_pin="x") }}
         - {{ pin_subpackage("libcute-dsl-runtime", exact=True) }}
         # Installing this package covers the C/C++ use case as well as the
@@ -227,7 +231,9 @@ outputs:
         - {{ pin_subpackage("libcute-dsl-runtime-static", exact=True) }}
       run_constrained:
         # Optional: only needed to disassemble the cubins when needed
-        - cuda-nvdisasm
+        # Anaconda: bound to the CTK major so a cu12 env cannot keep a 13.x nvdisasm (and vice versa)
+        - cuda-nvdisasm 13.*  # [(cuda_compiler_version or "").startswith("13")]
+        - cuda-nvdisasm 12.*  # [(cuda_compiler_version or "").startswith("12")]
     test:
       requires:
         - pip
