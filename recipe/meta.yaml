@@ -216,8 +216,8 @@ outputs:
         - protobuf >={{ protobuf_min }}
         # Provides the `tvm_ffi` module used by the TVM-FFI interop paths.
         # load_module() → ctypes.CDLL → dlopen
-        # Anaconda: >=0.1.11 is the minimum for kwargs, defaults and top-level dataclass
-        # arguments (tvm_ffi.utils.kwargs_wrapper). Upstream sets no pin; the floor comes from
+        # Anaconda: 0.1.11 or newer is the minimum for kwargs, defaults and top-level
+        # dataclass arguments (tvm_ffi.utils.kwargs_wrapper). Upstream sets no pin; the floor comes from
         # the DSL's own ImportError guard in (search for "apache-tvm-ffi"):
         # https://github.com/NVIDIA/cutlass/blob/v{{ version }}/python/CuTeDSL/cutlass/cutlass_dsl/tvm_ffi_provider.py
         - apache-tvm-ffi >=0.1.11
